@@ -1,5 +1,5 @@
 /*!
- * jQuery bxSliderExtreme v3.1.1
+ * jQuery bxSliderExtreme v3.1.3
  * https://github.com/psyrendust/bxsliderIW
  * Copyright 2012, Larry Gordon
  *
@@ -372,7 +372,21 @@
 				} // end if(!isWorking)
 			}
 		};
-
+		
+		/**
+		 * Get autoPlaying
+		 */
+		this.getAutoPlaying = function(){
+			return autoPlaying;
+		};
+		
+		/**
+		 * Set autoPlaying
+		 */
+		this.setAutoPlaying = function(bool){
+			autoPlaying = bool;
+		};
+		
 		/**
 		 * Go to first slide
 		 */
@@ -505,8 +519,9 @@
 		/**
 		 * Initialize a new slideshow
 		 */
-		this.initShow = function(){
-
+		this.initShow = function(overrides){
+			
+			options = $.extend(options, overrides);
 			// reinitialize all variables
 			// base = this;
 			$parent = $(this);
@@ -564,12 +579,12 @@
 			if(options.randomStart){
 				var randomNumber = Math.floor(Math.random() * childrenLength);
 				currentSlide = randomNumber;
-				origLeft = childrenOuterWidth * (options.moveSlideQty + randomNumber);
+				origLeft = childrenOuterWidth * randomNumber;
 				origTop = childrenMaxHeight * (options.moveSlideQty + randomNumber);
 			// start show at specific slide
 			}else{
 				currentSlide = options.startingSlide;
-				origLeft = childrenOuterWidth * (options.moveSlideQty + options.startingSlide);
+				origLeft = childrenOuterWidth * options.startingSlide;
 				origTop = childrenMaxHeight * (options.moveSlideQty + options.startingSlide);
 			}
 
@@ -669,9 +684,9 @@
 		/**
 		 * Reload the current slideshow
 		 */
-		this.reloadShow = function(){
+		this.reloadShow = function(overrides){
 			base.destroyShow();
-			base.initShow();
+			base.initShow(overrides);
 		};
 
 		// PRIVATE FUNCTIONS
@@ -687,9 +702,9 @@
 			var speed = (speedOverride===0)?speedOverride:widthSpeed;
 			if(windowWidth > maskWidth){
 				maskWidth = windowWidth;
-				maskLeft = -(windowWidth*(base.getCurrentSlide()+1));
+				maskLeft = -(windowWidth*(base.getCurrentSlide()));
 			}else{
-				maskLeft = -(maskWidth*(base.getCurrentSlide()+1));
+				maskLeft = -(maskWidth*(base.getCurrentSlide()));
 			}
 			if(windowWidth > itemWidth) {
 				itemWidth = windowWidth;
@@ -722,8 +737,6 @@
 		 * Creates all neccessary styling for the slideshow
 		 */
 		function initCss(){
-			// layout the children
-			setChildrenLayout(options.startingSlide);
 			// CSS for horizontal mode
 			if(options.mode == 'horizontal'){
 				// wrap the <ul> in div that acts as a window and make the <ul> uber wide
@@ -781,39 +794,6 @@
 				$outerWrapper.append('<div class="bx-captions"></div>');
 			}
 			$window = $outerWrapper.find('.bx-window');
-		}
-
-		/**
-		 * Depending on mode, lays out children in the proper setup
-		 */
-		function setChildrenLayout(){
-			// lays out children for horizontal or vertical modes
-			if(options.mode == 'horizontal' || options.mode == 'vertical'){
-
-				// get the children behind
-				var $prependedChildren = getArraySample($children, 0, options.moveSlideQty, 'backward');
-
-				// add each prepended child to the back of the original element
-				$.each($prependedChildren, function(index) {
-					$parent.prepend($(this));
-				});
-
-				// total number of slides to be hidden after the window
-				var totalNumberAfterWindow = (childrenLength + options.moveSlideQty) - 1;
-				// number of original slides hidden after the window
-				var pagerExcess = childrenLength - options.displaySlideQty;
-				// number of slides to append to the original hidden slides
-				var numberToAppend = totalNumberAfterWindow - pagerExcess;
-				// get the sample of extra slides to append
-				var $appendedChildren = getArraySample($children, 0, numberToAppend, 'forward');
-
-				if(options.infiniteLoop){
-					// add each appended child to the front of the original element
-					$.each($appendedChildren, function(index) {
-						$parent.append($(this));
-					});
-				}
-			}
 		}
 
 		/**
